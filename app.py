@@ -5,7 +5,7 @@ A Flask web app that provides a simple interface for the EU eTranslation API
 Based on the official EU documentation examples
 """
 
-from flask import Flask, render_template, request, jsonify, url_for
+from flask import Flask, render_template, request, jsonify, url_for, redirect
 import requests
 from requests.auth import HTTPDigestAuth
 import json
@@ -331,8 +331,8 @@ def status():
 
 @app.route('/test')
 def test():
-    """Test page to verify the API connection"""
-    return render_template('test.html')
+    """Test page - redirect to callback test interface"""
+    return redirect(url_for('test_callback'))
 
 @app.route('/api/test', methods=['POST'])
 def api_test():
