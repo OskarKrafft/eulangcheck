@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EU eTranslation Service</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #003d82 0%, #0056b3 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .eu-flag {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 1.5em;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .translation-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .text-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.3s ease;
+        }
+
+        .text-section:focus-within {
+            border-color: #0056b3;
+        }
+
+        .text-section h3 {
+            color: #003d82;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .textarea {
+            width: 100%;
+            min-height: 200px;
+            border: none;
+            background: transparent;
+            resize: vertical;
+            font-size: 16px;
+            line-height: 1.5;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .language-controls {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .language-group {
+            text-align: center;
+        }
+
+        .language-group label {
+            display: block;
+            color: #003d82;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .language-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .language-select:focus {
+            border-color: #0056b3;
+            outline: none;
+        }
+
+        .swap-button {
+            background: #0056b3;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .swap-button:hover {
+            background: #003d82;
+            transform: rotate(180deg);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0056b3 0%, #003d82 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,86,179,0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .status-panel {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status-panel.show {
+            display: block;
+        }
+
+        .status-panel.error {
+            background: #ffebee;
+            border-color: #f48fb1;
+        }
+
+        .status-panel.success {
+            background: #e8f5e8;
+            border-color: #4caf50;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0056b3;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .footer a {
+            color: #0056b3;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .translation-panel {
+                grid-template-columns: 1fr;
+            }
+            
+            .language-controls {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .swap-button {
+                justify-self: center;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>EU eTranslation Service <span class="eu-flag">🇪🇺</span></h1>
+            <p>Professional translation powered by the European Union's AI technology</p>
+        </div>
+
+        <div class="main-content">
+            <div class="status-panel" id="statusPanel">
+                <div id="statusMessage"></div>
+            </div>
+
+            <div class="language-controls">
+                <div class="language-group">
+                    <label for="sourceLanguage">From</label>
+                    <select id="sourceLanguage" class="language-select">
+                        {% for code, name in languages.items() %}
+                        <option value="{{ code }}" {% if code == 'EN' %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <button type="button" class="swap-button" id="swapButton" title="Swap languages">⇄</button>
+                
+                <div class="language-group">
+                    <label for="targetLanguage">To</label>
+                    <select id="targetLanguage" class="language-select">
+                        {% for code, name in languages.items() %}
+                        <option value="{{ code }}" {% if code == 'DE' %}selected{% endif %}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="translation-panel">
+                <div class="text-section">
+                    <h3>Original Text</h3>
+                    <textarea 
+                        id="textAreaOriginal" 
+                        class="textarea" 
+                        placeholder="Enter the text you want to translate..."
+                        maxlength="5000"
+                    ></textarea>
+                    <div class="char-count">
+                        <span id="charCount">0</span> / 5000 characters
+                    </div>
+                </div>
+                
+                <div class="text-section">
+                    <h3>Translation</h3>
+                    <textarea 
+                        id="textAreaTranslation" 
+                        class="textarea" 
+                        placeholder="Translation will appear here..."
+                        readonly
+                    ></textarea>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button type="button" class="btn btn-primary" id="translateButton">
+                    <span>🌐</span> Translate
+                </button>
+                <button type="button" class="btn btn-secondary" id="cancelButton" style="display: none;">
+                    <span>⏹️</span> Cancel
+                </button>
+                <button type="button" class="btn btn-secondary" id="clearButton">
+                    <span>🗑️</span> Clear
+                </button>
+                <a href="/test" class="btn btn-secondary">
+                    <span>🔧</span> Test API
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                Powered by the <a href="https://ec.europa.eu/info/departments/translation_en" target="_blank">European Commission's eTranslation service</a>
+                | <a href="/status" target="_blank">Service Status</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let currentRequestId = null;
+        let retryCount = 0;
+        const maxRetries = 300; // Check for up to 5 minutes (EU service can be very slow during peak times)
+
+        // Character counter
+        $('#textAreaOriginal').on('input', function() {
+            const count = $(this).val().length;
+            $('#charCount').text(count);
+            
+            if (count > 4500) {
+                $('#charCount').css('color', '#dc3545');
+            } else if (count > 4000) {
+                $('#charCount').css('color', '#ffc107');
+            } else {
+                $('#charCount').css('color', '#6c757d');
+            }
+        });
+
+        // Swap languages
+        $('#swapButton').click(function() {
+            const sourceValue = $('#sourceLanguage').val();
+            const targetValue = $('#targetLanguage').val();
+            
+            $('#sourceLanguage').val(targetValue);
+            $('#targetLanguage').val(sourceValue);
+        });
+
+        // Clear button
+        $('#clearButton').click(function() {
+            $('#textAreaOriginal').val('');
+            $('#textAreaTranslation').val('');
+            $('#charCount').text('0');
+            hideStatus();
+        });
+
+        // Cancel button
+        $('#cancelButton').click(function() {
+            currentRequestId = null;
+            retryCount = 0;
+            $('#translateButton').prop('disabled', false);
+            $('#cancelButton').hide();
+            showStatus('Translation cancelled by user.', 'error');
+        });
+
+        // Cancel button
+        $('#cancelButton').click(function() {
+            if (currentRequestId) {
+                showStatus('⏹️ Translation cancelled by user. Request ID: ' + currentRequestId, 'error');
+                currentRequestId = null;
+                retryCount = maxRetries; // Stop checking
+                $('#translateButton').prop('disabled', false);
+                $('#cancelButton').hide();
+            }
+        });
+
+        // Translate button
+        $('#translateButton').click(function() {
+            const textToTranslate = $('#textAreaOriginal').val().trim();
+            const sourceLanguage = $('#sourceLanguage').val();
+            const targetLanguage = $('#targetLanguage').val();
+
+            // Validation
+            if (!textToTranslate) {
+                showStatus('Please enter text to translate.', 'error');
+                return;
+            }
+
+            if (sourceLanguage === targetLanguage) {
+                showStatus('Please select different source and target languages.', 'error');
+                return;
+            }
+
+            sendTranslationRequest(sourceLanguage, targetLanguage, textToTranslate);
+        });
+
+        function sendTranslationRequest(sourceLanguage, targetLanguage, textToTranslate) {
+            showStatus('<span class="loading-spinner"></span> Sending translation request...', 'info');
+            
+            $('#translateButton').prop('disabled', true);
+            $('#cancelButton').show();
+            $('#textAreaTranslation').val('');
+
+            $.ajax({
+                url: '/receiveRequest',
+                method: 'POST',
+                data: {
+                    textToTranslate: textToTranslate,
+                    sourceLanguage: sourceLanguage,
+                    targetLanguage: targetLanguage
+                },
+                success: function(data) {
+                    const requestId = data.trim();
+                    console.log('Request ID:', requestId);
+
+                    if (parseInt(requestId) > 0) {
+                        currentRequestId = requestId;
+                        retryCount = 0;
+                        showStatus('<span class="loading-spinner"></span> Translation in progress... This may take up to 5 minutes. The EU service processes requests in queue and can be busy during peak hours.', 'info');
+                        checkTranslationResult(requestId);
+                    } else {
+                        handleErrorCode(parseInt(requestId));
+                        $('#translateButton').prop('disabled', false);
+                        $('#cancelButton').hide();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Request failed:', status, error);
+                    showStatus('Failed to send translation request. Please try again.', 'error');
+                    $('#translateButton').prop('disabled', false);
+                    $('#cancelButton').hide();
+                }
+            });
+        }
+
+        function checkTranslationResult(requestId) {
+            // Check if user has cancelled
+            if (currentRequestId === null) {
+                return; // User cancelled, stop checking
+            }
+            
+            if (retryCount >= maxRetries) {
+                showStatus('⏰ Translation is taking longer than expected. The EU service might be experiencing very high demand.<br><br>' +
+                          '<strong>Your request ID is: ' + requestId + '</strong><br>' +
+                          'The service can sometimes take up to 10-15 minutes during peak hours. You can:<br>' +
+                          '• Wait a bit longer and refresh the page to check manually<br>' +
+                          '• Check the <a href="/status" target="_blank">service status</a><br>' +
+                          '• Try again later when the service is less busy<br>' +
+                          '• Contact EU support if the issue persists', 'error');
+                $('#translateButton').prop('disabled', false);
+                $('#cancelButton').hide();
+                return;
+            }
+
+            // Show progress updates
+            const elapsed = retryCount;
+            const remaining = maxRetries - retryCount;
+            const elapsedMinutes = Math.floor(elapsed / 60);
+            const elapsedSeconds = elapsed % 60;
+            
+            if (elapsed > 0 && elapsed % 30 === 0) { // Update every 30 seconds
+                let timeDisplay = '';
+                if (elapsedMinutes > 0) {
+                    timeDisplay = elapsedMinutes + 'm ' + elapsedSeconds + 's';
+                } else {
+                    timeDisplay = elapsed + 's';
+                }
+                showStatus('<span class="loading-spinner"></span> Still waiting for translation... (' + timeDisplay + ' elapsed, up to 5 minutes total)', 'info');
+            }
+
+            $.ajax({
+                url: '/checkResult',
+                method: 'POST',
+                data: {
+                    idRequest: requestId
+                },
+                success: function(data) {
+                    if (data && data.trim()) {
+                        // Translation completed
+                        $('#textAreaTranslation').val(data);
+                        const completionTime = elapsed > 60 ? 
+                            Math.floor(elapsed / 60) + 'm ' + (elapsed % 60) + 's' : 
+                            elapsed + 's';
+                        showStatus('✅ Translation completed successfully! (took ' + completionTime + ')', 'success');
+                        $('#translateButton').prop('disabled', false);
+                        $('#cancelButton').hide();
+                        currentRequestId = null;
+                    } else {
+                        // Still pending, check again
+                        retryCount++;
+                        setTimeout(() => {
+                            checkTranslationResult(requestId);
+                        }, 1000); // Check every second
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Check result failed:', status, error);
+                    retryCount++;
+                    if (retryCount < maxRetries) {
+                        setTimeout(() => {
+                            checkTranslationResult(requestId);
+                        }, 1000);
+                    } else {
+                        showStatus('❌ Error checking translation status. The service might be temporarily unavailable.<br>' +
+                                  'Your request ID: ' + requestId, 'error');
+                        $('#translateButton').prop('disabled', false);
+                        $('#cancelButton').hide();
+                    }
+                }
+            });
+        }
+
+        function handleErrorCode(errorCode) {
+            let message = '';
+            
+            switch(errorCode) {
+                case -1001:
+                    message = 'Please enter text to translate.';
+                    break;
+                case -1002:
+                    message = 'Please select both source and target languages.';
+                    break;
+                case -1003:
+                    message = 'Source and target languages must be different.';
+                    break;
+                case -20028:
+                    message = 'Service is currently busy. Please try again in a few minutes.';
+                    break;
+                case -20000:
+                    message = 'Translation service error. Please try again later.';
+                    break;
+                case -401:
+                    message = 'Authentication failed. Please check your API credentials.';
+                    break;
+                case -403:
+                    message = 'Access forbidden. Your application might not be properly registered.';
+                    break;
+                case -404:
+                    message = 'Translation service is not available.';
+                    break;
+                default:
+                    message = `Translation failed with error code: ${errorCode}. Please try again.`;
+            }
+            
+            showStatus(message, 'error');
+        }
+
+        function showStatus(message, type) {
+            const panel = $('#statusPanel');
+            const messageDiv = $('#statusMessage');
+            
+            panel.removeClass('error success info').addClass(type + ' show');
+            messageDiv.html(message);
+        }
+
+        function hideStatus() {
+            $('#statusPanel').removeClass('show');
+        }
+
+        // Auto-hide success messages after 5 seconds
+        $(document).on('DOMSubtreeModified', '#statusPanel.success', function() {
+            setTimeout(() => {
+                if ($('#statusPanel').hasClass('success')) {
+                    hideStatus();
+                }
+            }, 5000);
+        });
+
+        // Enable Enter key to translate
+        $('#textAreaOriginal').keydown(function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.keyCode === 13) { // Ctrl+Enter or Cmd+Enter
+                $('#translateButton').click();
+            }
+        });
+
+        console.log('EU eTranslation Web App loaded successfully');
+    </script>
+</body>
+</html>
